@@ -1,19 +1,19 @@
+import EmptyState from "../components/EmptyState"
+import PageHeader from "../components/PageHeader"
+
 function ItemsPage() {
     return (
         <main className="main-content">
-            <header className="page-header">
-                <div>
-                    <p className="eyebrow">Your workspace</p>
-                    <h1>Items</h1>
-                    <p className="page-description">
-                        Create and organize the things that matter to you.
-                    </p>
-                </div>
-
-                <button className="primary-button" type="button">
-                    Create item
-                </button>
-            </header>
+            <PageHeader
+                eyebrow="Your workspace"
+                title="Items"
+                description="Create and organize the things that matter to you."
+                action={
+                    <button className="primary-button" type="button">
+                        Create item
+                    </button>
+                }
+            />
 
             <section className="content-section" aria-labelledby="all-items-heading">
                 <div className="section-header">
@@ -24,16 +24,7 @@ function ItemsPage() {
                     <span className="item-count">0 total</span>
                 </div>
 
-                <div className="empty-state">
-                    <div className="empty-icon" aria-hidden="true">
-                        +
-                    </div>
-                    <h3>Your collection is empty</h3>
-                    <p>Add an item to start building your workspace.</p>
-                    <button className="secondary-button" type="button">
-                        Add an item
-                    </button>
-                </div>
+                <EmptyState />
             </section>
         </main>
     )

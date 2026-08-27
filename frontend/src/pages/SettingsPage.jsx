@@ -1,15 +1,13 @@
+import PageHeader from "../components/PageHeader"
+
 function SettingsPage() {
     return (
         <main className="main-content">
-            <header className="page-header">
-                <div>
-                    <p className="eyebrow">Workspace</p>
-                    <h1>Settings</h1>
-                    <p className="page-description">
-                        Adjust your workspace preferences.
-                    </p>
-                </div>
-            </header>
+            <PageHeader
+                eyebrow="Workspace"
+                title="Settings"
+                description="Adjust your workspace preferences."
+            />
 
             <section className="content-section" aria-labelledby="profile-heading">
                 <div className="section-header">

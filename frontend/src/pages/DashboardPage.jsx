@@ -1,21 +1,19 @@
 import EmptyState from "../components/EmptyState"
+import PageHeader from "../components/PageHeader"
 
 function DashboardPage() {
     return(
         <main className='main-content'>
-        <header className='page-header'>
-          <div>
-            <p className='eyebrow'>Overview</p>
-            <h1>Dashboard</h1>
-            <p className='page-description'>
-              Manage your workspace from one calm, focused place.
-            </p>
-          </div>
-
-          <button className='primary-button' type="button">
-            Create Item
-          </button>
-        </header>
+        <PageHeader
+          eyebrow="Overview"
+          title="Dashboard"
+          description="Manage your workspace from one calm, focused place."
+          action={
+            <button className="primary-button" type="button">
+              Create item
+            </button>
+          }
+        />
         <section className='content-section' aria-labelledby="items-heading">
           <div className="section-header">
             <div>
