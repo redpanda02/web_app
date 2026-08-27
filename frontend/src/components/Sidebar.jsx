@@ -1,18 +1,33 @@
-
+import { NavLink } from "react-router-dom";
 function Sidebar() {
     return(
             <aside className="sidebar">
         <div className="brand">Workplace</div>
         <nav className="navigation" aria-label='Main navigation'>
-          <a className='navigation-link active' href='/'>
+        <NavLink
+          className={({ isActive }) =>
+            isActive ? 'navigation-link active' : 'navigation-link'
+          }
+          to="/"
+        >
           Dashboard
-          </a>
-          <a className='navigation-link' href='/items'>
+        </NavLink>
+        <NavLink
+          className={({ isActive }) =>
+            isActive ? 'navigation-link active' : 'navigation-link'
+          }
+          to="/items"
+        >
           Items
-          </a>
-          <a className='navigation-link' href='/settings'>
+        </NavLink>
+        <NavLink
+          className={({ isActive }) =>
+            isActive ? 'navigation-link active' : 'navigation-link'
+          }
+          to="/settings"
+        >
           Settings
-          </a>
+        </NavLink>
         </nav>
 
         <div className='sidebar-footer'>
