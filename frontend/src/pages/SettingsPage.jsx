@@ -17,22 +17,7 @@ function SettingsPage() {
                     </div>
                 </div>
 
-                <form>
-                    <label htmlFor="workspace-name">Workspace name</label>
-                    <input id="workspace-name" name="workspaceName" defaultValue="Workplace" />
-
-                    <label htmlFor="workspace-description">Description</label>
-                    <textarea
-                        id="workspace-description"
-                        name="workspaceDescription"
-                        defaultValue="Personal workspace"
-                        rows="4"
-                    />
-
-                    <button className="primary-button" type="submit">
-                        Save changes
-                    </button>
-                </form>
+                
             </section>
         </main>
     )
