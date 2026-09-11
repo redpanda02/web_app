@@ -190,5 +190,4 @@ function ItemsPage() {
         </main>
     )
 }
-
 export default ItemsPage

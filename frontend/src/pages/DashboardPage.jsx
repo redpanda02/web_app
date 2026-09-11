@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import EmptyState from '../components/EmptyState'
 import PageHeader from '../components/PageHeader'
-
 function DashboardPage() {
     const [items, setItems] = useState([])
     const [loading, setLoading] = useState(true)
@@ -33,11 +32,7 @@ function DashboardPage() {
                 eyebrow="Overview"
                 title="Dashboard"
                 description="Manage your workspace from one calm, focused place."
-                action={
-                    <button className="primary-button" type="button">
-                        Create item
-                    </button>
-                }
+                
             />
 
             <section className="content-section" aria-labelledby="items-heading">
@@ -67,5 +62,4 @@ function DashboardPage() {
         </main>
     )
 }
-
 export default DashboardPage
