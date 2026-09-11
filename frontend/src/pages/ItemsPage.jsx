@@ -1,13 +1,34 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import EmptyState from '../components/EmptyState'
 import PageHeader from '../components/PageHeader'
+import { useItemForm } from '../hooks/useItemForm'
 
 function ItemsPage() {
     const [items, setItems] = useState([])
     const [loading, setLoading] = useState(true)
-    const [showForm, setShowForm] = useState(false)
-    const [editingId, setEditingId] = useState(null)
-    const [formValues, setFormValues] = useState({ title: '', description: '' })
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [feedback, setFeedback] = useState({ type: '', message: '' })
+    const {
+        showForm,
+        editingId,
+        formValues,
+        setFormValues,
+        resetForm,
+        startCreate,
+        startEdit,
+    } = useItemForm()
+
+    const formError = useMemo(() => {
+        if (!formValues.title.trim()) {
+            return 'Title is required.'
+        }
+
+        if (!formValues.description.trim()) {
+            return 'Description is required.'
+        }
+
+        return ''
+    }, [formValues])
 
     async function loadItems() {
         try {
@@ -30,22 +51,20 @@ function ItemsPage() {
         loadItems()
     }, [])
 
-    function resetForm() {
-        setShowForm(false)
-        setEditingId(null)
-        setFormValues({ title: '', description: '' })
-    }
-
     async function handleSubmit(event) {
         event.preventDefault()
+
+        if (formError) {
+            setFeedback({ type: 'error', message: formError })
+            return
+        }
+
+        setIsSubmitting(true)
+        setFeedback({ type: '', message: '' })
 
         const payload = {
             title: formValues.title.trim(),
             description: formValues.description.trim(),
-        }
-
-        if (!payload.title || !payload.description) {
-            return
         }
 
         try {
@@ -62,14 +81,26 @@ function ItemsPage() {
                 throw new Error('Save failed')
             }
 
+            setFeedback({
+                type: 'success',
+                message: editingId ? 'Item updated successfully.' : 'Item created successfully.',
+            })
             resetForm()
             await loadItems()
         } catch (error) {
             console.error('Failed to save item', error)
+            setFeedback({ type: 'error', message: 'Something went wrong while saving the item.' })
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
     async function handleDelete(id) {
+        const confirmed = window.confirm('Delete this item?')
+        if (!confirmed) {
+            return
+        }
+
         try {
             const response = await fetch(`/api/items/${id}`, {
                 method: 'DELETE',
@@ -79,21 +110,12 @@ function ItemsPage() {
                 throw new Error('Delete failed')
             }
 
+            setFeedback({ type: 'success', message: 'Item deleted successfully.' })
             await loadItems()
         } catch (error) {
             console.error('Failed to delete item', error)
+            setFeedback({ type: 'error', message: 'Unable to delete this item.' })
         }
-    }
-
-    function startCreate() {
-        resetForm()
-        setShowForm(true)
-    }
-
-    function startEdit(item) {
-        setEditingId(item.id)
-        setFormValues({ title: item.title, description: item.description })
-        setShowForm(true)
     }
 
     return (
@@ -117,6 +139,10 @@ function ItemsPage() {
                     </div>
                     <span className="item-count">{items.length} total</span>
                 </div>
+
+                {feedback.message && (
+                    <div className={`feedback ${feedback.type}`}>{feedback.message}</div>
+                )}
 
                 {showForm && (
                     <form className="item-form" onSubmit={handleSubmit}>
@@ -150,9 +176,15 @@ function ItemsPage() {
                             </label>
                         </div>
 
+                        {formError && <p className="field-error">{formError}</p>}
+
                         <div className="form-actions">
-                            <button className="primary-button" type="submit">
-                                {editingId ? 'Save changes' : 'Create item'}
+                            <button
+                                className="primary-button"
+                                type="submit"
+                                disabled={isSubmitting || !!formError}
+                            >
+                                {isSubmitting ? 'Saving...' : editingId ? 'Save changes' : 'Create item'}
                             </button>
                             <button className="secondary-button" type="button" onClick={resetForm}>
                                 Cancel
@@ -178,7 +210,7 @@ function ItemsPage() {
                                     <button className="secondary-button" type="button" onClick={() => startEdit(item)}>
                                         Edit
                                     </button>
-                                    <button className="primary-button" type="button" onClick={() => handleDelete(item.id)}>
+                                    <button className="primary-button danger-button" type="button" onClick={() => handleDelete(item.id)}>
                                         Delete
                                     </button>
                                 </div>
@@ -190,4 +222,5 @@ function ItemsPage() {
         </main>
     )
 }
+
 export default ItemsPage

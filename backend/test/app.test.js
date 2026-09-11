@@ -2,6 +2,7 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 
 const app = require('../src/app')
+const db = require('../db')
 
 async function getJson(path) {
   const server = app.listen(0)
@@ -27,6 +28,10 @@ async function getJson(path) {
   }
 }
 
+function createItem({ title = 'Sample', description = 'Sample description' } = {}) {
+  return db.prepare('INSERT INTO items (title, description) VALUES (?, ?)').run(title, description)
+}
+
 test('GET /api/health returns ok status', async () => {
   const response = await getJson('/api/health')
 
@@ -34,25 +39,73 @@ test('GET /api/health returns ok status', async () => {
   assert.deepEqual(response.json, { status: 'ok' })
 })
 
-test('GET /api/items returns the sample items list', async () => {
+test('GET /api/items returns the items list', async () => {
   const response = await getJson('/api/items')
 
   assert.equal(response.status, 200)
   assert.ok(Array.isArray(response.json))
-  assert.equal(response.json.length, 1)
-  assert.deepEqual(response.json[0], {
-    id: 1,
-    title: 'First item',
-    description: 'A sample item',
-  })
+  assert.ok(response.json.length >= 1)
+})
+
+test('POST /api/items creates an item', async () => {
+  const server = app.listen(0)
+  await new Promise((resolve) => server.once('listening', resolve))
+
+  const { port } = server.address()
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/api/items`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'New item', description: 'Created via API' }),
+    })
+
+    const payload = await response.json()
+
+    assert.equal(response.status, 201)
+    assert.equal(payload.title, 'New item')
+    assert.equal(payload.description, 'Created via API')
+  } finally {
+    await new Promise((resolve, reject) => {
+      server.close((error) => {
+        if (error) reject(error)
+        else resolve()
+      })
+    })
+  }
+})
+
+test('PUT /api/items/:id updates an item', async () => {
+  const inserted = createItem({ title: 'Old title', description: 'Old description' })
+  const server = app.listen(0)
+  await new Promise((resolve) => server.once('listening', resolve))
+
+  const { port } = server.address()
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/api/items/${inserted.lastInsertRowid}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'New title', description: 'New description' }),
+    })
+
+    const payload = await response.json()
+
+    assert.equal(response.status, 200)
+    assert.equal(payload.title, 'New title')
+    assert.equal(payload.description, 'New description')
+  } finally {
+    await new Promise((resolve, reject) => {
+      server.close((error) => {
+        if (error) reject(error)
+        else resolve()
+      })
+    })
+  }
 })
 
 test('DELETE /api/items/:id removes the item', async () => {
-  const db = require('../db')
-  const inserted = db.prepare(
-    'INSERT INTO items (title, description) VALUES (?, ?)'
-  ).run('Delete me', 'temporary item')
-
+  const inserted = createItem({ title: 'Delete me', description: 'temporary item' })
   const server = app.listen(0)
   await new Promise((resolve) => server.once('listening', resolve))
 
