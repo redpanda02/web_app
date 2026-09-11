@@ -46,3 +46,32 @@ test('GET /api/items returns the sample items list', async () => {
     description: 'A sample item',
   })
 })
+
+test('DELETE /api/items/:id removes the item', async () => {
+  const db = require('../db')
+  const inserted = db.prepare(
+    'INSERT INTO items (title, description) VALUES (?, ?)'
+  ).run('Delete me', 'temporary item')
+
+  const server = app.listen(0)
+  await new Promise((resolve) => server.once('listening', resolve))
+
+  const { port } = server.address()
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/api/items/${inserted.lastInsertRowid}`, {
+      method: 'DELETE',
+    })
+
+    assert.equal(response.status, 204)
+    const item = db.prepare('SELECT * FROM items WHERE id = ?').get(inserted.lastInsertRowid)
+    assert.equal(item, undefined)
+  } finally {
+    await new Promise((resolve, reject) => {
+      server.close((error) => {
+        if (error) reject(error)
+        else resolve()
+      })
+    })
+  }
+})

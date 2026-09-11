@@ -188,6 +188,79 @@ h3 {
   font-size: 15px;
 }
 
+.item-list {
+  list-style: none;
+  display: grid;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid #dfe7f1;
+  border-radius: 2px;
+  background: #f8fafc;
+}
+
+.item-card h3 {
+  margin-bottom: 8px;
+}
+
+.item-card p {
+  margin: 0;
+  color: #475569;
+}
+
+.item-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.item-form {
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid #dfe7f1;
+  border-radius: 2px;
+  background: #f8fafc;
+}
+
+.form-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.item-form label {
+  display: grid;
+  gap: 8px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.item-form input,
+.item-form textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 2px;
+  padding: 10px 12px;
+  font: inherit;
+  background: #ffffff;
+  color: #111827;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+}
+
 @media (max-width: 700px) {
   .app-shell {
     display: block;
@@ -234,5 +307,14 @@ h3 {
 
   .content-section {
     padding: 20px;
+  }
+
+  .item-card {
+    display: block;
+  }
+
+  .item-actions,
+  .form-actions {
+    margin-top: 16px;
   }
 }
