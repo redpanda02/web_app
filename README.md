@@ -1,16 +1,14 @@
 # web_app
 
-A reusable web application starter designed to provide a consistent foundation for building, testing, and deploying web projects.
+A small full-stack item management application built with React, Express, and SQLite. The frontend provides the dashboard and CRUD interface; the backend exposes the JSON API and persists data locally.
 
 ## Features
 
-- Modular and reusable application structure
-- Environment-based configuration
-- Development and production workflows
-- Automated testing support
-- Linting and formatting support
-- Secure handling of configuration values
-- Easy local setup and deployment
+- React and Vite frontend
+- Express API with health and item CRUD routes
+- SQLite persistence through `better-sqlite3`
+- Form validation, loading states, feedback, and delete confirmation
+- Node.js backend tests and frontend production builds
 
 ## Requirements
 
@@ -19,77 +17,110 @@ Install the tools required by the project before getting started:
 - Git
 - Node.js and npm
 - A supported web browser
-- Any additional services configured by the application
+- Node.js 20 or newer is recommended
 
 ## Getting Started
 
-Clone the repository:
+Clone the repository and enter the project:
 
 ```bash
 git clone <repository-url>
 cd web_app
 ```
 
-Install dependencies:
+Install backend dependencies:
 
 ```bash
+cd backend
 npm install
 ```
 
-Create a local environment file if required:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Update `.env` with the values needed for your environment.
-
-Start the development server:
+Install frontend dependencies in a second terminal:
 
 ```bash
+cd frontend
+npm install
+```
+
+The backend creates `backend/app.db` automatically on first start. You can optionally create `backend/.env` with `PORT=3000`.
+
+Start the backend:
+
+```powershell
+cd backend
 npm run dev
 ```
 
-Open the URL displayed in the terminal, commonly `http://localhost:3000`.
+Start the frontend in a second terminal:
+
+```powershell
+cd frontend
+npm run dev
+```
+
+Open the Vite URL shown in the terminal, usually `http://localhost:5173`. The Vite development proxy forwards `/api` requests to `http://localhost:3000`.
 
 ## Available Scripts
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Starts the development server |
-| `npm run build` | Creates a production build |
-| `npm run start` | Starts the production application |
-| `npm test` | Runs the test suite |
-| `npm run lint` | Checks the code for linting issues |
-| `npm run format` | Formats the source code |
+Run these commands from the indicated directory:
+
+| Directory | Command | Description |
+|---|---|---|
+| `backend` | `npm run dev` | Starts the API with file watching |
+| `backend` | `npm start` | Starts the API |
+| `backend` | `npm test` | Runs API tests |
+| `frontend` | `npm run dev` | Starts the Vite development server |
+| `frontend` | `npm run build` | Creates the production frontend build |
+| `frontend` | `npm run lint` | Checks frontend source with Oxlint |
 
 > Available commands depend on the project configuration. Update this table when scripts are added or removed.
 
+## API
+
+The backend listens on port `3000` by default.
+
+| Method | Route | Purpose |
+|---|---|---|
+| `GET` | `/api/health` | API health check |
+| `GET` | `/api/items` | List items |
+| `POST` | `/api/items` | Create an item |
+| `PUT` | `/api/items/:id` | Update an item |
+| `DELETE` | `/api/items/:id` | Delete an item |
+
+Create and update requests require non-empty `title` and `description` strings. Item IDs must be positive integers.
+
 ## Configuration
 
-Store environment-specific values in `.env`. Do not commit sensitive values to source control.
+Store environment-specific values in `backend/.env`. Do not commit sensitive values to source control.
 
 Example:
 
 ```env
-NODE_ENV=development
 PORT=3000
-API_URL=http://localhost:3001
 ```
 
-Use `.env.example` to document required variables without including secrets.
+The local SQLite database is `backend/app.db`. Database files are ignored by Git.
 
 ## Project Structure
 
 ```text
 web_app/
-├── public/          # Static assets
-├── src/             # Application source code
-├── tests/           # Automated tests
-├── .env.example     # Environment variable template
-├── .gitignore       # Git exclusions
-├── package.json      # Dependencies and scripts
-└── README.md        # Project documentation
+├── backend/
+│   ├── db.js
+│   ├── src/
+│   │   ├── app.js
+│   │   ├── server.js
+│   │   └── routes/item.routes.js
+│   └── test/app.test.js
+├── frontend/
+│   ├── src/
+│   │   ├── pages/
+│   │   ├── components/
+│   │   └── hooks/
+│   └── vite.config.js
+└── README.md
 ```
 
 Adjust this structure to match the actual project.
@@ -103,67 +134,21 @@ Adjust this structure to match the actual project.
 - Add tests for new functionality and bug fixes.
 - Run linting, formatting, and tests before submitting changes.
 
-## Testing
+## Testing and release checks
 
-Run the test suite with:
+Run the backend tests:
 
 ```bash
+cd backend
 npm test
 ```
 
-Tests should cover important application behavior, error handling, and reusable modules.
-
-## Production Build
-
-Create a production build:
+Build and lint the frontend:
 
 ```bash
+cd frontend
+npm run lint
 npm run build
 ```
 
-Run the production application:
-
-```bash
-npm run start
-```
-
-Before deployment, verify that:
-
-- Production environment variables are configured.
-- The application builds successfully.
-- Tests and linting pass.
-- Debug settings are disabled.
-- Sensitive information is not exposed.
-
-## Deployment
-
-This application can be deployed to any platform that supports its runtime.
-
-Typical deployment steps:
-
-1. Install dependencies.
-2. Configure production environment variables.
-3. Build the application.
-4. Start the production server.
-5. Configure a domain, HTTPS, logging, and monitoring.
-
-Add platform-specific deployment instructions here when a deployment provider is selected.
-
-## Contributing
-
-1. Create a feature branch.
-2. Make focused changes.
-3. Add or update tests.
-4. Run linting, formatting, and tests.
-5. Commit the changes with a descriptive message.
-6. Open a pull request.
-
-## License
-
-Specify the project license here, for example:
-
-```text
-MIT License
-```
-
-If no license has been selected, treat the project as proprietary and obtain permission before redistributing it.
+For deployment, build the frontend and deploy it separately from the Express API, or configure Express to serve `frontend/dist`. SQLite requires persistent disk storage in production; use a hosted database if the deployment platform has ephemeral storage.

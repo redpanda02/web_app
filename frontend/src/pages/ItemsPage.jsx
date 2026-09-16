@@ -6,7 +6,9 @@ import { useItemForm } from '../hooks/useItemForm'
 function ItemsPage() {
     const [items, setItems] = useState([])
     const [loading, setLoading] = useState(true)
+    const [loadError, setLoadError] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [deletingId, setDeletingId] = useState(null)
     const [feedback, setFeedback] = useState({ type: '', message: '' })
     const {
         showForm,
@@ -39,9 +41,11 @@ function ItemsPage() {
 
             const data = await response.json()
             setItems(data)
+            setLoadError('')
         } catch (error) {
             console.error('Failed to fetch items', error)
             setItems([])
+            setLoadError('Unable to load items. Check that the API is running and try again.')
         } finally {
             setLoading(false)
         }
@@ -101,6 +105,9 @@ function ItemsPage() {
             return
         }
 
+        setDeletingId(id)
+        setFeedback({ type: '', message: '' })
+
         try {
             const response = await fetch(`/api/items/${id}`, {
                 method: 'DELETE',
@@ -115,6 +122,8 @@ function ItemsPage() {
         } catch (error) {
             console.error('Failed to delete item', error)
             setFeedback({ type: 'error', message: 'Unable to delete this item.' })
+        } finally {
+            setDeletingId(null)
         }
     }
 
@@ -125,7 +134,7 @@ function ItemsPage() {
                 title="Items"
                 description="Create and organize the things that matter to you."
                 action={
-                    <button className="primary-button" type="button" onClick={startCreate}>
+                    <button className="primary-button" type="button" onClick={startCreate} disabled={isSubmitting || deletingId !== null}>
                         Create item
                     </button>
                 }
@@ -195,6 +204,13 @@ function ItemsPage() {
 
                 {loading ? (
                     <p>Loading items...</p>
+                ) : loadError ? (
+                    <div className="error-state">
+                        <p>{loadError}</p>
+                        <button className="secondary-button" type="button" onClick={() => { setLoading(true); loadItems() }}>
+                            Try again
+                        </button>
+                    </div>
                 ) : items.length === 0 ? (
                     <EmptyState />
                 ) : (
@@ -207,11 +223,11 @@ function ItemsPage() {
                                 </div>
 
                                 <div className="item-actions">
-                                    <button className="secondary-button" type="button" onClick={() => startEdit(item)}>
+                                    <button className="secondary-button" type="button" onClick={() => startEdit(item)} disabled={deletingId !== null}>
                                         Edit
                                     </button>
-                                    <button className="primary-button danger-button" type="button" onClick={() => handleDelete(item.id)}>
-                                        Delete
+                                    <button className="primary-button danger-button" type="button" onClick={() => handleDelete(item.id)} disabled={deletingId !== null}>
+                                        {deletingId === item.id ? 'Deleting...' : 'Delete'}
                                     </button>
                                 </div>
                             </li>

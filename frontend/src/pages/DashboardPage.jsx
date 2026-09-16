@@ -4,6 +4,7 @@ import PageHeader from '../components/PageHeader'
 function DashboardPage() {
     const [items, setItems] = useState([])
     const [loading, setLoading] = useState(true)
+    const [loadError, setLoadError] = useState('')
 
     useEffect(() => {
         async function loadItems() {
@@ -15,9 +16,11 @@ function DashboardPage() {
 
                 const data = await response.json()
                 setItems(data)
+                setLoadError('')
             } catch (error) {
                 console.error('Failed to fetch dashboard data', error)
                 setItems([])
+                setLoadError('Unable to load dashboard data. Check that the API is running and try again.')
             } finally {
                 setLoading(false)
             }
@@ -46,6 +49,8 @@ function DashboardPage() {
 
                 {loading ? (
                     <p>Loading items...</p>
+                ) : loadError ? (
+                    <p className="error-state">{loadError}</p>
                 ) : items.length === 0 ? (
                     <EmptyState />
                 ) : (

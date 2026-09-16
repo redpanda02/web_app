@@ -128,3 +128,55 @@ test('DELETE /api/items/:id removes the item', async () => {
     })
   }
 })
+
+test('POST /api/items rejects blank fields', async () => {
+  const server = app.listen(0)
+  await new Promise((resolve) => server.once('listening', resolve))
+
+  const { port } = server.address()
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/api/items`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: '   ', description: '   ' }),
+    })
+
+    assert.equal(response.status, 400)
+  } finally {
+    await new Promise((resolve, reject) => {
+      server.close((error) => {
+        if (error) reject(error)
+        else resolve()
+      })
+    })
+  }
+})
+
+test('item routes reject invalid IDs and unknown API routes return JSON errors', async () => {
+  const server = app.listen(0)
+  await new Promise((resolve) => server.once('listening', resolve))
+
+  const { port } = server.address()
+
+  let invalidId
+  try {
+    const response = await fetch(`http://127.0.0.1:${port}/api/items/not-an-id`, {
+      method: 'DELETE',
+    })
+    invalidId = response
+  } finally {
+    await new Promise((resolve, reject) => {
+      server.close((error) => {
+        if (error) reject(error)
+        else resolve()
+      })
+    })
+  }
+
+  const unknownRoute = await getJson('/api/missing')
+
+  assert.equal(invalidId.status, 400)
+  assert.equal(unknownRoute.status, 404)
+  assert.equal(unknownRoute.json.error, 'API route not found')
+})
